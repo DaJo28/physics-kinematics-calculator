@@ -7,7 +7,7 @@ class CalculadoraFisica:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Física - Cinemática")
-        self.root.geometry("760x600")
+        self.root.geometry("850x850")
         self.root.resizable(False, False)
         self.root.configure(bg="#eef3f9")
 
@@ -17,6 +17,7 @@ class CalculadoraFisica:
         self.entries = {}
         self.labels_amigables = {}
         self.campos_requeridos = []
+        self.objetivos_map = {}
 
         self.crear_interfaz()
         self.actualizar_campos()
@@ -25,11 +26,11 @@ class CalculadoraFisica:
         titulo = tk.Label(
             self.root,
             text="Calculadora de Física - Cinemática",
-            font=("Comfortaa", 20, "bold"),
+            font=("Comfortaa", 22, "bold"),
             bg="#eef3f9",
             fg="#1f3b5c"
         )
-        titulo.pack(pady=(15, 5))
+        titulo.pack(pady=(18, 6))
 
         subtitulo = tk.Label(
             self.root,
@@ -44,8 +45,8 @@ class CalculadoraFisica:
             self.root,
             text="Configuración del problema",
             font=("Comfortaa", 11, "bold"),
-            padx=15,
-            pady=15,
+            padx=18,
+            pady=18,
             bg="white",
             fg="#1f3b5c"
         )
@@ -63,7 +64,7 @@ class CalculadoraFisica:
             textvariable=self.movimiento_var,
             values=["MRU", "MRUV"],
             state="readonly",
-            width=22
+            width=24
         )
         combo_movimiento.grid(row=0, column=1, padx=10, pady=8, sticky="w")
         combo_movimiento.bind("<<ComboboxSelected>>", lambda e: self.actualizar_campos())
@@ -79,7 +80,7 @@ class CalculadoraFisica:
             marco_seleccion,
             textvariable=self.objetivo_var,
             state="readonly",
-            width=22
+            width=24
         )
         self.combo_objetivo.grid(row=1, column=1, padx=10, pady=8, sticky="w")
         self.combo_objetivo.bind("<<ComboboxSelected>>", lambda e: self.actualizar_estado_entradas())
@@ -88,8 +89,8 @@ class CalculadoraFisica:
             self.root,
             text="Datos conocidos",
             font=("Comfortaa", 11, "bold"),
-            padx=15,
-            pady=15,
+            padx=18,
+            pady=18,
             bg="white",
             fg="#1f3b5c"
         )
@@ -104,7 +105,7 @@ class CalculadoraFisica:
             font=("Comfortaa", 12, "bold"),
             bg="#2E86C1",
             fg="white",
-            width=15,
+            width=16,
             command=self.calcular_resultado
         )
         boton_calcular.grid(row=0, column=0, padx=10)
@@ -115,7 +116,7 @@ class CalculadoraFisica:
             font=("Comfortaa", 12, "bold"),
             bg="#85929e",
             fg="white",
-            width=15,
+            width=16,
             command=self.limpiar_todo
         )
         boton_limpiar.grid(row=0, column=1, padx=10)
@@ -124,23 +125,26 @@ class CalculadoraFisica:
             self.root,
             text="Resultado",
             font=("Comfortaa", 11, "bold"),
-            padx=15,
-            pady=15,
+            padx=12,
+            pady=12,
             bg="white",
             fg="#1f3b5c"
         )
-        marco_resultado.pack(fill="both", expand=True, padx=20, pady=10)
+        marco_resultado.pack(fill="both", expand=True, padx=20, pady=12)
 
-        self.resultado_label = tk.Label(
+        self.resultado_text = tk.Text(
             marco_resultado,
-            text="Aquí aparecerá el resultado del cálculo.",
-            font=("Comfortaa", 14, "bold"),
+            font=("Comfortaa", 11),
             bg="white",
             fg="#1b2631",
-            wraplength=650,
-            justify="left"
+            wrap="word",
+            height=10,
+            relief="flat",
+            bd=0
         )
-        self.resultado_label.pack(anchor="w")
+        self.resultado_text.pack(fill="both", expand=True)
+        self.resultado_text.insert("1.0", "Aquí aparecerá el resultado del cálculo.")
+        self.resultado_text.config(state="disabled")
 
     def limpiar_campos(self):
         for widget in self.marco_campos.winfo_children():
@@ -179,8 +183,8 @@ class CalculadoraFisica:
 
         self.labels_amigables = {clave: texto.replace(":", "") for clave, texto in variables}
         self.objetivos_map = {texto: clave for clave, texto in objetivos}
-        nombres_objetivos = [texto for _, texto in objetivos]
 
+        nombres_objetivos = [texto for _, texto in objetivos]
         self.combo_objetivo["values"] = nombres_objetivos
         self.objetivo_var.set(nombres_objetivos[0])
 
@@ -191,16 +195,16 @@ class CalculadoraFisica:
                 font=("Comfortaa", 11),
                 bg="white"
             )
-            label.grid(row=i, column=0, padx=12, pady=8, sticky="w")
+            label.grid(row=i, column=0, padx=12, pady=10, sticky="w")
 
             entry = tk.Entry(
                 self.marco_campos,
-                width=25,
+                width=28,
                 font=("Comfortaa", 11),
                 relief="solid",
                 bd=1
             )
-            entry.grid(row=i, column=1, padx=12, pady=8, sticky="w")
+            entry.grid(row=i, column=1, padx=12, pady=10, sticky="w")
 
             self.entries[clave] = entry
 
@@ -224,6 +228,10 @@ class CalculadoraFisica:
 
     def actualizar_estado_entradas(self):
         objetivo_amigable = self.objetivo_var.get()
+
+        if objetivo_amigable not in self.objetivos_map:
+            return
+
         objetivo = self.objetivos_map[objetivo_amigable]
         movimiento = self.movimiento_var.get()
 
@@ -241,9 +249,12 @@ class CalculadoraFisica:
 
     def obtener_datos(self):
         datos = {}
+
         for clave in self.campos_requeridos:
-            entry = self.entries[clave]
-            valor_texto = entry.get().strip()
+            if clave not in self.entries:
+                raise ValueError(f"No se encontró el campo requerido: {clave}")
+
+            valor_texto = self.entries[clave].get().strip()
 
             if not valor_texto:
                 nombre_visible = self.labels_amigables.get(clave, clave)
@@ -251,31 +262,52 @@ class CalculadoraFisica:
 
             try:
                 datos[clave] = float(valor_texto)
-            except ValueError as e:
+            except ValueError:
                 nombre_visible = self.labels_amigables.get(clave, clave)
-                raise ValueError(f"El valor ingresado en {nombre_visible} no es un número válido.") from e
+                raise ValueError(f"El valor ingresado en {nombre_visible} no es un número válido.")
 
         return datos
 
+    def formatear_datos(self, datos):
+        lineas = []
+        for clave, valor in datos.items():
+            nombre = self.labels_amigables.get(clave, clave)
+            lineas.append(f"• {nombre} = {valor}")
+        return "\n".join(lineas)
+
+    def mostrar_resultado(self, texto):
+        self.resultado_text.config(state="normal")
+        self.resultado_text.delete("1.0", tk.END)
+        self.resultado_text.insert("1.0", texto)
+        self.resultado_text.config(state="disabled")
+
     def calcular_resultado(self):
+        #print("Se presionó el botón Calcular")
+
         try:
             movimiento = self.movimiento_var.get()
             objetivo_amigable = self.objetivo_var.get()
+
+            if objetivo_amigable not in self.objetivos_map:
+                raise ValueError("Debe seleccionar un dato a calcular.")
+
             objetivo = self.objetivos_map[objetivo_amigable]
             datos = self.obtener_datos()
+
+            #print("Movimiento:", movimiento)
+            #print("Objetivo:", objetivo)
+            #print("Datos:", datos)
 
             if movimiento == "MRU":
                 resultado, unidad = calcular_mru(objetivo, datos)
             else:
                 resultado, unidad = calcular_mruv(objetivo, datos)
 
-            self.resultado_label.config(
-                text=(
-                    f"Movimiento: {movimiento}\n"
-                    f"Dato calculado: {objetivo_amigable}\n"
-                    f"Resultado: {resultado:.2f} {unidad}"
-                )
-            )
+            #print("Resultado:", resultado, unidad)
+
+            texto_resultado = (f"Movimiento seleccionado: {movimiento}\nResultado final: {resultado:.2f} {unidad}")
+
+            self.mostrar_resultado(texto_resultado)
 
         except ValueError as e:
             messagebox.showerror("Error de entrada", str(e))
@@ -288,7 +320,7 @@ class CalculadoraFisica:
             entry.delete(0, tk.END)
 
         self.actualizar_estado_entradas()
-        self.resultado_label.config(text="Aquí aparecerá el resultado del cálculo.")
+        self.mostrar_resultado("Aquí aparecerá el resultado del cálculo.")
 
 
 if __name__ == "__main__":

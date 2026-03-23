@@ -8,7 +8,9 @@ Desktop application developed in Python using Tkinter to solve kinematics proble
 - MRUV calculations
 - Friendly graphical interface
 - Variable selection
-- Unit display
+- Clear result display
+- Input validation
+- Reset Button
 
 ## Technologies
 
