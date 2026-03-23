@@ -6,6 +6,7 @@ Desktop application developed in Python using Tkinter to solve kinematics proble
 
 - MRU calculations
 - MRUV calculations
+- Free Fall calculations
 - Friendly graphical interface
 - Variable selection
 - Clear result display

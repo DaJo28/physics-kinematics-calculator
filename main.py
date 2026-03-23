@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from formulas import calcular_mru, calcular_mruv, calcular_caida_libre
+from formulas import calcular_mru, calcular_mruv, calcular_caida_libre, calcular_lanzamiento_vertical
 
 
 class CalculadoraFisica:
@@ -63,7 +63,7 @@ class CalculadoraFisica:
         combo_movimiento = ttk.Combobox(
             marco_seleccion,
             textvariable=self.movimiento_var,
-            values=["MRU", "MRUV", "CAÍDA LIBRE"],
+            values=["MRU", "MRUV", "CAÍDA LIBRE", "LANZAMIENTO VERTICAL"],
             state="readonly",
             width=24
         )
@@ -161,7 +161,8 @@ class CalculadoraFisica:
             "velocidad_inicial": ["m/s", "km/h"],
             "velocidad_final": ["m/s", "km/h"],
             "tiempo": ["s", "min", "h"],
-            "aceleracion": ["m/s²"]
+            "aceleracion": ["m/s²"],
+            "altura": ["m", "km"]
         }
         return unidades.get(clave, [""])
 
@@ -203,6 +204,18 @@ class CalculadoraFisica:
                 ("velocidad", "Velocidad"),
                 ("distancia", "Distancia"),
                 ("tiempo", "Tiempo")
+            ]
+        elif movimiento == "LANZAMIENTO VERTICAL":
+            objetivos = [
+                ("velocidad_final", "Velocidad Final"),
+                ("altura", "Altura"),
+                ("tiempo", "Tiempo")
+            ]
+            variables = [
+                ("velocidad_inicial", "Velocidad inicial"),
+                ("velocidad_final", "Velocidad final"),
+                ("tiempo", "Tiempo"),
+                ("altura", "Altura")
             ]
 
         self.labels_amigables = {clave: texto for clave, texto in variables}
@@ -284,6 +297,13 @@ class CalculadoraFisica:
                 "distancia": ["tiempo"],
                 "tiempo": ["distancia"]
             }
+        elif movimiento == "LANZAMIENTO VERTICAL":
+            requeridos = {
+                "velocidad_final": ["velocidad_inicial", "tiempo"],
+                "altura": ["velocidad_inicial", "tiempo"],
+                "tiempo": ["velocidad_inicial", "velocidad_final"]
+            }
+            
         return requeridos[objetivo]
 
     def actualizar_estado_entradas(self):
@@ -332,6 +352,12 @@ class CalculadoraFisica:
 
         elif clave == "aceleracion":
             return valor
+        
+        elif clave in "altura":
+            if unidad == "m":
+                return valor
+            elif unidad == "km":
+                return valor / 1000
 
         return valor
 
@@ -358,6 +384,12 @@ class CalculadoraFisica:
 
         elif clave == "aceleracion":
             return valor
+        
+        elif clave == "altura":
+            if unidad == "m":
+                return valor
+            elif unidad == "km":
+                return valor / 1000
 
         return valor
 
@@ -411,6 +443,8 @@ class CalculadoraFisica:
                 resultado_base, _ = calcular_mruv(objetivo, datos)
             elif movimiento == "CAÍDA LIBRE":
                 resultado_base, _ = calcular_caida_libre(objetivo, datos)
+            elif movimiento == "LANZAMIENTO VERTICAL":
+                resultado_base, _ = calcular_lanzamiento_vertical(objetivo, datos)
 
             unidad_salida = self.unit_boxes[objetivo].get()
             resultado_convertido = self.convertir_desde_base(objetivo, resultado_base, unidad_salida)
