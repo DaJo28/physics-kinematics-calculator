@@ -7,14 +7,15 @@ class CalculadoraFisica:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Física - Cinemática")
-        self.root.geometry("850x850")
-        self.root.resizable(False, False)
+        self.root.geometry("980x850")
+        self.root.resizable(True, True)
         self.root.configure(bg="#eef3f9")
 
         self.movimiento_var = tk.StringVar(value="MRU")
         self.objetivo_var = tk.StringVar()
 
         self.entries = {}
+        self.unit_boxes = {}
         self.labels_amigables = {}
         self.campos_requeridos = []
         self.objetivos_map = {}
@@ -34,7 +35,7 @@ class CalculadoraFisica:
 
         subtitulo = tk.Label(
             self.root,
-            text="Seleccione el tipo de movimiento, el dato que desea calcular e ingrese los valores necesarios.",
+            text="Seleccione el tipo de movimiento, el dato que desea calcular, ingrese los valores y elija las unidades.",
             font=("Comfortaa", 10),
             bg="#eef3f9",
             fg="#3b4f63"
@@ -87,7 +88,7 @@ class CalculadoraFisica:
 
         self.marco_campos = tk.LabelFrame(
             self.root,
-            text="Datos conocidos",
+            text="Datos conocidos y unidades",
             font=("Comfortaa", 11, "bold"),
             padx=18,
             pady=18,
@@ -138,7 +139,7 @@ class CalculadoraFisica:
             bg="white",
             fg="#1b2631",
             wrap="word",
-            height=10,
+            height=12,
             relief="flat",
             bd=0
         )
@@ -150,7 +151,19 @@ class CalculadoraFisica:
         for widget in self.marco_campos.winfo_children():
             widget.destroy()
         self.entries.clear()
+        self.unit_boxes.clear()
         self.labels_amigables.clear()
+
+    def obtener_unidades_por_variable(self, clave):
+        unidades = {
+            "distancia": ["m", "km"],
+            "velocidad": ["m/s", "km/h"],
+            "velocidad_inicial": ["m/s", "km/h"],
+            "velocidad_final": ["m/s", "km/h"],
+            "tiempo": ["s", "min", "h"],
+            "aceleracion": ["m/s²"]
+        }
+        return unidades.get(clave, [""])
 
     def actualizar_campos(self):
         self.limpiar_campos()
@@ -163,9 +176,9 @@ class CalculadoraFisica:
                 ("tiempo", "Tiempo")
             ]
             variables = [
-                ("distancia", "Distancia (m):"),
-                ("velocidad", "Velocidad (m/s):"),
-                ("tiempo", "Tiempo (s):")
+                ("distancia", "Distancia"),
+                ("velocidad", "Velocidad"),
+                ("tiempo", "Tiempo")
             ]
         else:
             objetivos = [
@@ -174,24 +187,45 @@ class CalculadoraFisica:
                 ("aceleracion", "Aceleración")
             ]
             variables = [
-                ("velocidad_inicial", "Velocidad inicial (m/s):"),
-                ("velocidad_final", "Velocidad final (m/s):"),
-                ("aceleracion", "Aceleración (m/s²):"),
-                ("tiempo", "Tiempo (s):"),
-                ("distancia", "Distancia (m):")
+                ("velocidad_inicial", "Velocidad inicial"),
+                ("velocidad_final", "Velocidad final"),
+                ("aceleracion", "Aceleración"),
+                ("tiempo", "Tiempo"),
+                ("distancia", "Distancia")
             ]
 
-        self.labels_amigables = {clave: texto.replace(":", "") for clave, texto in variables}
+        self.labels_amigables = {clave: texto for clave, texto in variables}
         self.objetivos_map = {texto: clave for clave, texto in objetivos}
 
         nombres_objetivos = [texto for _, texto in objetivos]
         self.combo_objetivo["values"] = nombres_objetivos
         self.objetivo_var.set(nombres_objetivos[0])
 
-        for i, (clave, texto) in enumerate(variables):
+        tk.Label(
+            self.marco_campos,
+            text="Magnitud",
+            font=("Comfortaa", 11, "bold"),
+            bg="white"
+        ).grid(row=0, column=0, padx=10, pady=8, sticky="w")
+
+        tk.Label(
+            self.marco_campos,
+            text="Valor",
+            font=("Comfortaa", 11, "bold"),
+            bg="white"
+        ).grid(row=0, column=1, padx=10, pady=8, sticky="w")
+
+        tk.Label(
+            self.marco_campos,
+            text="Unidad",
+            font=("Comfortaa", 11, "bold"),
+            bg="white"
+        ).grid(row=0, column=2, padx=10, pady=8, sticky="w")
+
+        for i, (clave, texto) in enumerate(variables, start=1):
             label = tk.Label(
                 self.marco_campos,
-                text=texto,
+                text=f"{texto}:",
                 font=("Comfortaa", 11),
                 bg="white"
             )
@@ -199,14 +233,24 @@ class CalculadoraFisica:
 
             entry = tk.Entry(
                 self.marco_campos,
-                width=28,
+                width=20,
                 font=("Comfortaa", 11),
                 relief="solid",
                 bd=1
             )
             entry.grid(row=i, column=1, padx=12, pady=10, sticky="w")
 
+            combo_unidad = ttk.Combobox(
+                self.marco_campos,
+                values=self.obtener_unidades_por_variable(clave),
+                state="readonly",
+                width=12
+            )
+            combo_unidad.grid(row=i, column=2, padx=12, pady=10, sticky="w")
+            combo_unidad.set(self.obtener_unidades_por_variable(clave)[0])
+
             self.entries[clave] = entry
+            self.unit_boxes[clave] = combo_unidad
 
         self.actualizar_estado_entradas()
 
@@ -223,7 +267,6 @@ class CalculadoraFisica:
                 "distancia": ["velocidad_inicial", "aceleracion", "tiempo"],
                 "aceleracion": ["velocidad_inicial", "velocidad_final", "tiempo"]
             }
-
         return requeridos[objetivo]
 
     def actualizar_estado_entradas(self):
@@ -234,45 +277,98 @@ class CalculadoraFisica:
 
         objetivo = self.objetivos_map[objetivo_amigable]
         movimiento = self.movimiento_var.get()
-
         self.campos_requeridos = self.definir_campos_requeridos(movimiento, objetivo)
 
         for clave, entry in self.entries.items():
             if clave == objetivo:
                 entry.config(state="disabled")
                 entry.delete(0, tk.END)
+                self.unit_boxes[clave].config(state="readonly")
             elif clave in self.campos_requeridos:
                 entry.config(state="normal")
+                self.unit_boxes[clave].config(state="readonly")
             else:
                 entry.config(state="disabled")
                 entry.delete(0, tk.END)
+                self.unit_boxes[clave].config(state="disabled")
+
+    def convertir_a_base(self, clave, valor, unidad):
+        if clave in ["distancia"]:
+            if unidad == "m":
+                return valor
+            elif unidad == "km":
+                return valor * 1000
+
+        elif clave in ["velocidad", "velocidad_inicial", "velocidad_final"]:
+            if unidad == "m/s":
+                return valor
+            elif unidad == "km/h":
+                return valor / 3.6
+
+        elif clave == "tiempo":
+            if unidad == "s":
+                return valor
+            elif unidad == "min":
+                return valor * 60
+            elif unidad == "h":
+                return valor * 3600
+
+        elif clave == "aceleracion":
+            return valor
+
+        return valor
+
+    def convertir_desde_base(self, clave, valor, unidad):
+        if clave == "distancia":
+            if unidad == "m":
+                return valor
+            elif unidad == "km":
+                return valor / 1000
+
+        elif clave in ["velocidad", "velocidad_inicial", "velocidad_final"]:
+            if unidad == "m/s":
+                return valor
+            elif unidad == "km/h":
+                return valor * 3.6
+
+        elif clave == "tiempo":
+            if unidad == "s":
+                return valor
+            elif unidad == "min":
+                return valor / 60
+            elif unidad == "h":
+                return valor / 3600
+
+        elif clave == "aceleracion":
+            return valor
+
+        return valor
 
     def obtener_datos(self):
         datos = {}
 
         for clave in self.campos_requeridos:
-            if clave not in self.entries:
-                raise ValueError(f"No se encontró el campo requerido: {clave}")
-
             valor_texto = self.entries[clave].get().strip()
 
             if not valor_texto:
-                nombre_visible = self.labels_amigables.get(clave, clave)
-                raise ValueError(f"Debe ingresar un valor para {nombre_visible}.")
+                raise ValueError(f"Debe ingresar un valor para {self.labels_amigables[clave]}.")
 
             try:
-                datos[clave] = float(valor_texto)
+                valor = float(valor_texto)
             except ValueError:
-                nombre_visible = self.labels_amigables.get(clave, clave)
-                raise ValueError(f"El valor ingresado en {nombre_visible} no es un número válido.")
+                raise ValueError(f"El valor ingresado en {self.labels_amigables[clave]} no es numérico.")
+
+            unidad = self.unit_boxes[clave].get()
+            datos[clave] = self.convertir_a_base(clave, valor, unidad)
 
         return datos
 
-    def formatear_datos(self, datos):
+    def formatear_datos_ingresados(self):
         lineas = []
-        for clave, valor in datos.items():
-            nombre = self.labels_amigables.get(clave, clave)
-            lineas.append(f"• {nombre} = {valor}")
+        for clave in self.campos_requeridos:
+            valor = self.entries[clave].get().strip()
+            unidad = self.unit_boxes[clave].get()
+            lineas.append(f"• {self.labels_amigables[clave]} = {valor} {unidad}")
         return "\n".join(lineas)
 
     def mostrar_resultado(self, texto):
@@ -282,8 +378,6 @@ class CalculadoraFisica:
         self.resultado_text.config(state="disabled")
 
     def calcular_resultado(self):
-        #print("Se presionó el botón Calcular")
-
         try:
             movimiento = self.movimiento_var.get()
             objetivo_amigable = self.objetivo_var.get()
@@ -294,18 +388,16 @@ class CalculadoraFisica:
             objetivo = self.objetivos_map[objetivo_amigable]
             datos = self.obtener_datos()
 
-            #print("Movimiento:", movimiento)
-            #print("Objetivo:", objetivo)
-            #print("Datos:", datos)
-
             if movimiento == "MRU":
-                resultado, unidad = calcular_mru(objetivo, datos)
+                resultado_base, _ = calcular_mru(objetivo, datos)
             else:
-                resultado, unidad = calcular_mruv(objetivo, datos)
+                resultado_base, _ = calcular_mruv(objetivo, datos)
 
-            #print("Resultado:", resultado, unidad)
+            unidad_salida = self.unit_boxes[objetivo].get()
+            resultado_convertido = self.convertir_desde_base(objetivo, resultado_base, unidad_salida)
 
-            texto_resultado = (f"Movimiento seleccionado: {movimiento}\nResultado final: {resultado:.2f} {unidad}")
+            texto_resultado = (f"Movimiento seleccionado: {movimiento}\nResultado final: {resultado_convertido:.2f} {unidad_salida}"
+            )
 
             self.mostrar_resultado(texto_resultado)
 
@@ -315,9 +407,13 @@ class CalculadoraFisica:
             messagebox.showerror("Error", f"Ocurrió un error inesperado:\n{e}")
 
     def limpiar_todo(self):
-        for entry in self.entries.values():
+        for clave, entry in self.entries.items():
             entry.config(state="normal")
             entry.delete(0, tk.END)
+
+        for clave, combo in self.unit_boxes.items():
+            combo.config(state="readonly")
+            combo.set(self.obtener_unidades_por_variable(clave)[0])
 
         self.actualizar_estado_entradas()
         self.mostrar_resultado("Aquí aparecerá el resultado del cálculo.")
