@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from formulas import calcular_mru, calcular_mruv
+from formulas import calcular_mru, calcular_mruv, calcular_caida_libre
 
 
 class CalculadoraFisica:
@@ -63,7 +63,7 @@ class CalculadoraFisica:
         combo_movimiento = ttk.Combobox(
             marco_seleccion,
             textvariable=self.movimiento_var,
-            values=["MRU", "MRUV"],
+            values=["MRU", "MRUV", "CAÍDA LIBRE"],
             state="readonly",
             width=24
         )
@@ -180,7 +180,7 @@ class CalculadoraFisica:
                 ("velocidad", "Velocidad"),
                 ("tiempo", "Tiempo")
             ]
-        else:
+        elif movimiento == "MRUV":
             objetivos = [
                 ("velocidad_final", "Velocidad Final"),
                 ("distancia", "Distancia"),
@@ -192,6 +192,17 @@ class CalculadoraFisica:
                 ("aceleracion", "Aceleración"),
                 ("tiempo", "Tiempo"),
                 ("distancia", "Distancia")
+            ]
+        elif movimiento == "CAÍDA LIBRE":
+            objetivos = [
+                ("velocidad", "Velocidad"),
+                ("distancia", "Distancia"),
+                ("tiempo", "Tiempo")
+            ]
+            variables = [
+                ("velocidad", "Velocidad"),
+                ("distancia", "Distancia"),
+                ("tiempo", "Tiempo")
             ]
 
         self.labels_amigables = {clave: texto for clave, texto in variables}
@@ -261,11 +272,17 @@ class CalculadoraFisica:
                 "velocidad": ["distancia", "tiempo"],
                 "tiempo": ["distancia", "velocidad"]
             }
-        else:
+        elif movimiento == "MRUV":
             requeridos = {
                 "velocidad_final": ["velocidad_inicial", "aceleracion", "tiempo"],
                 "distancia": ["velocidad_inicial", "aceleracion", "tiempo"],
                 "aceleracion": ["velocidad_inicial", "velocidad_final", "tiempo"]
+            }
+        elif movimiento == "CAÍDA LIBRE":
+            requeridos = {
+                "velocidad": ["tiempo"],
+                "distancia": ["tiempo"],
+                "tiempo": ["distancia"]
             }
         return requeridos[objetivo]
 
@@ -390,8 +407,10 @@ class CalculadoraFisica:
 
             if movimiento == "MRU":
                 resultado_base, _ = calcular_mru(objetivo, datos)
-            else:
+            elif movimiento == "MRUV":
                 resultado_base, _ = calcular_mruv(objetivo, datos)
+            elif movimiento == "CAÍDA LIBRE":
+                resultado_base, _ = calcular_caida_libre(objetivo, datos)
 
             unidad_salida = self.unit_boxes[objetivo].get()
             resultado_convertido = self.convertir_desde_base(objetivo, resultado_base, unidad_salida)

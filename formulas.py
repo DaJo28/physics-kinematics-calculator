@@ -34,3 +34,19 @@ def calcular_mruv(objetivo, datos):
         return (datos["velocidad_final"] - datos["velocidad_inicial"]) / datos["tiempo"], "m/s²"
 
     raise ValueError("Variable objetivo no válida. Debe ser 'velocidad_final', 'distancia' o 'aceleracion'.")
+
+def calcular_caida_libre(objetivo, datos):
+    g = 9.8 #es el valor de la gravedad
+    
+    if objetivo == "velocidad":
+        return (g * datos["tiempo"], "m/s")
+    
+    elif objetivo == "distancia":
+        return (0.5 * g * (datos["tiempo"] ** 2), "m")
+    
+    elif objetivo == "tiempo":
+        if datos["distancia"] < 0:
+            raise ValueError("La distancia no puede ser negativa para calcular el tiempo de caída libre.")
+        return (((2 * datos["distancia"])/g)**0.5, "s")
+    
+    raise ValueError("Variable objetivo no válida. Debe ser 'velocidad', 'distancia' o 'tiempo'.")
