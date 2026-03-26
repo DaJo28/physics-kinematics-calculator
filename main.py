@@ -1,18 +1,20 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
-from formulas import calcular_mru, calcular_mruv, calcular_caida_libre, calcular_lanzamiento_vertical
+import customtkinter as ctk
+from tkinter import messagebox
+from formulas import (calcular_mru,calcular_mruv, calcular_caida_libre, calcular_lanzamiento_vertical)
+
+ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("blue")
 
 
-class CalculadoraFisica:
+class CalculadoraFisicaApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Física - Cinemática")
-        self.root.geometry("980x850")
-        self.root.resizable(True, True)
-        self.root.configure(bg="#eef3f9")
+        self.root.geometry("1180x760")
+        self.root.minsize(1080, 700)
 
-        self.movimiento_var = tk.StringVar(value="MRU")
-        self.objetivo_var = tk.StringVar()
+        self.movimiento_var = ctk.StringVar(value="MRU")
+        self.objetivo_var = ctk.StringVar(value="")
 
         self.entries = {}
         self.unit_boxes = {}
@@ -20,135 +22,137 @@ class CalculadoraFisica:
         self.campos_requeridos = []
         self.objetivos_map = {}
 
-        self.crear_interfaz()
+        self.configurar_grid()
+        self.crear_layout()
         self.actualizar_campos()
 
-    def crear_interfaz(self):
-        titulo = tk.Label(
-            self.root,
+    def configurar_grid(self):
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
+
+    def crear_layout(self):
+        self.header = ctk.CTkFrame(self.root, corner_radius=18, fg_color="#d9e9f7")
+        self.header.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=20, pady=(20, 10))
+
+        self.title_label = ctk.CTkLabel(
+            self.header,
             text="Calculadora de Física - Cinemática",
-            font=("Comfortaa", 22, "bold"),
-            bg="#eef3f9",
-            fg="#1f3b5c"
+            font=("Comfortaa", 26, "bold"),
+            text_color="#16324f"
         )
-        titulo.pack(pady=(18, 6))
+        self.title_label.pack(pady=(18, 6))
 
-        subtitulo = tk.Label(
-            self.root,
-            text="Seleccione el tipo de movimiento, el dato que desea calcular, ingrese los valores y elija las unidades.",
-            font=("Comfortaa", 10),
-            bg="#eef3f9",
-            fg="#3b4f63"
+        self.subtitle_label = ctk.CTkLabel(
+            self.header,
+            text="Seleccione el tipo de movimiento, el dato a calcular, ingrese valores y elija las unidades.",
+            font=("Comfortaa", 13),
+            text_color="#35516b"
         )
-        subtitulo.pack(pady=(0, 15))
+        self.subtitle_label.pack(pady=(0, 18))
 
-        marco_seleccion = tk.LabelFrame(
-            self.root,
+        self.panel_izquierdo = ctk.CTkFrame(self.root, corner_radius=18)
+        self.panel_izquierdo.grid(row=1, column=0, sticky="nsew", padx=(20, 10), pady=(0, 20))
+        self.panel_izquierdo.grid_columnconfigure(0, weight=1)
+
+        self.panel_derecho = ctk.CTkFrame(self.root, corner_radius=18)
+        self.panel_derecho.grid(row=1, column=1, sticky="nsew", padx=(10, 20), pady=(0, 20))
+        self.panel_derecho.grid_rowconfigure(1, weight=1)
+        self.panel_derecho.grid_columnconfigure(0, weight=1)
+
+        self.crear_panel_configuracion()
+        self.crear_panel_resultado()
+
+    def crear_panel_configuracion(self):
+        self.config_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius=14)
+        self.config_frame.pack(fill="x", padx=18, pady=(18, 10))
+
+        ctk.CTkLabel(
+            self.config_frame,
             text="Configuración del problema",
-            font=("Comfortaa", 11, "bold"),
-            padx=18,
-            pady=18,
-            bg="white",
-            fg="#1f3b5c"
-        )
-        marco_seleccion.pack(fill="x", padx=20, pady=10)
+            font=("Comfortaa", 18, "bold")
+        ).grid(row=0, column=0, columnspan=2, sticky="w", padx=18, pady=(18, 16))
 
-        tk.Label(
-            marco_seleccion,
-            text="Tipo de movimiento:",
-            font=("Comfortaa", 11),
-            bg="white"
-        ).grid(row=0, column=0, padx=10, pady=8, sticky="w")
+        ctk.CTkLabel(
+            self.config_frame,
+            text="Tipo de movimiento",
+            font=("Comfortaa", 13, "bold")
+        ).grid(row=1, column=0, sticky="w", padx=18, pady=8)
 
-        combo_movimiento = ttk.Combobox(
-            marco_seleccion,
-            textvariable=self.movimiento_var,
+        self.combo_movimiento = ctk.CTkOptionMenu(
+            self.config_frame,
+            variable=self.movimiento_var,
             values=["MRU", "MRUV", "CAÍDA LIBRE", "LANZAMIENTO VERTICAL"],
-            state="readonly",
-            width=24
+            command=lambda _: self.actualizar_campos(),
+            font=("Comfortaa", 12),
+            dropdown_font=("Comfortaa", 12)
         )
-        combo_movimiento.grid(row=0, column=1, padx=10, pady=8, sticky="w")
-        combo_movimiento.bind("<<ComboboxSelected>>", lambda e: self.actualizar_campos())
+        self.combo_movimiento.grid(row=1, column=1, sticky="ew", padx=18, pady=8)
 
-        tk.Label(
-            marco_seleccion,
-            text="Dato a calcular:",
-            font=("Comfortaa", 11),
-            bg="white"
-        ).grid(row=1, column=0, padx=10, pady=8, sticky="w")
+        ctk.CTkLabel(
+            self.config_frame,
+            text="Dato a calcular",
+            font=("Comfortaa", 13, "bold")
+        ).grid(row=2, column=0, sticky="w", padx=18, pady=(8, 18))
 
-        self.combo_objetivo = ttk.Combobox(
-            marco_seleccion,
-            textvariable=self.objetivo_var,
-            state="readonly",
-            width=24
+        self.combo_objetivo = ctk.CTkOptionMenu(
+            self.config_frame,
+            variable=self.objetivo_var,
+            values=[""],
+            command=lambda _: self.actualizar_estado_entradas(),
+            font=("Comfortaa", 12),
+            dropdown_font=("Comfortaa", 12)
         )
-        self.combo_objetivo.grid(row=1, column=1, padx=10, pady=8, sticky="w")
-        self.combo_objetivo.bind("<<ComboboxSelected>>", lambda e: self.actualizar_estado_entradas())
+        self.combo_objetivo.grid(row=2, column=1, sticky="ew", padx=18, pady=(8, 18))
 
-        self.marco_campos = tk.LabelFrame(
-            self.root,
-            text="Datos conocidos y unidades",
-            font=("Comfortaa", 11, "bold"),
-            padx=18,
-            pady=18,
-            bg="white",
-            fg="#1f3b5c"
-        )
-        self.marco_campos.pack(fill="x", padx=20, pady=10)
+        self.config_frame.grid_columnconfigure(1, weight=1)
 
-        marco_botones = tk.Frame(self.root, bg="#eef3f9")
-        marco_botones.pack(pady=15)
+        self.datos_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius=14)
+        self.datos_frame.pack(fill="both", expand=True, padx=18, pady=10)
+        self.datos_frame.grid_columnconfigure(1, weight=1)
 
-        boton_calcular = tk.Button(
-            marco_botones,
+        self.botones_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius=14)
+        self.botones_frame.pack(fill="x", padx=18, pady=(10, 18))
+
+        self.boton_calcular = ctk.CTkButton(
+            self.botones_frame,
             text="Calcular",
-            font=("Comfortaa", 12, "bold"),
-            bg="#2E86C1",
-            fg="white",
-            width=16,
-            command=self.calcular_resultado
+            command=self.calcular_resultado,
+            font=("Comfortaa", 13, "bold"),
+            height=42
         )
-        boton_calcular.grid(row=0, column=0, padx=10)
+        self.boton_calcular.pack(side="left", expand=True, fill="x", padx=(16, 8), pady=16)
 
-        boton_limpiar = tk.Button(
-            marco_botones,
+        self.boton_limpiar = ctk.CTkButton(
+            self.botones_frame,
             text="Limpiar",
-            font=("Comfortaa", 12, "bold"),
-            bg="#85929e",
-            fg="white",
-            width=16,
-            command=self.limpiar_todo
+            command=self.limpiar_todo,
+            font=("Comfortaa", 13, "bold"),
+            height=42,
+            fg_color="#7c8a99",
+            hover_color="#6d7985"
         )
-        boton_limpiar.grid(row=0, column=1, padx=10)
+        self.boton_limpiar.pack(side="left", expand=True, fill="x", padx=(8, 16), pady=16)
 
-        marco_resultado = tk.LabelFrame(
-            self.root,
+    def crear_panel_resultado(self):
+        self.resultado_header = ctk.CTkLabel(
+            self.panel_derecho,
             text="Resultado",
-            font=("Comfortaa", 11, "bold"),
-            padx=12,
-            pady=12,
-            bg="white",
-            fg="#1f3b5c"
+            font=("Comfortaa", 18, "bold")
         )
-        marco_resultado.pack(fill="both", expand=True, padx=20, pady=12)
+        self.resultado_header.grid(row=0, column=0, sticky="w", padx=20, pady=(20, 10))
 
-        self.resultado_text = tk.Text(
-            marco_resultado,
-            font=("Comfortaa", 11),
-            bg="white",
-            fg="#1b2631",
-            wrap="word",
-            height=12,
-            relief="flat",
-            bd=0
+        self.resultado_text = ctk.CTkTextbox(
+            self.panel_derecho,
+            font=("Comfortaa", 13),
+            corner_radius=14
         )
-        self.resultado_text.pack(fill="both", expand=True)
+        self.resultado_text.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 20))
         self.resultado_text.insert("1.0", "Aquí aparecerá el resultado del cálculo.")
-        self.resultado_text.config(state="disabled")
+        self.resultado_text.configure(state="disabled")
 
     def limpiar_campos(self):
-        for widget in self.marco_campos.winfo_children():
+        for widget in self.datos_frame.winfo_children():
             widget.destroy()
         self.entries.clear()
         self.unit_boxes.clear()
@@ -157,12 +161,12 @@ class CalculadoraFisica:
     def obtener_unidades_por_variable(self, clave):
         unidades = {
             "distancia": ["m", "km"],
+            "altura": ["m", "km"],
             "velocidad": ["m/s", "km/h"],
             "velocidad_inicial": ["m/s", "km/h"],
             "velocidad_final": ["m/s", "km/h"],
             "tiempo": ["s", "min", "h"],
-            "aceleracion": ["m/s²"],
-            "altura": ["m", "km"]
+            "aceleracion": ["m/s²"]
         }
         return unidades.get(clave, [""])
 
@@ -181,6 +185,7 @@ class CalculadoraFisica:
                 ("velocidad", "Velocidad"),
                 ("tiempo", "Tiempo")
             ]
+
         elif movimiento == "MRUV":
             objetivos = [
                 ("velocidad_final", "Velocidad Final"),
@@ -194,18 +199,20 @@ class CalculadoraFisica:
                 ("tiempo", "Tiempo"),
                 ("distancia", "Distancia")
             ]
+
         elif movimiento == "CAÍDA LIBRE":
             objetivos = [
                 ("velocidad", "Velocidad"),
-                ("distancia", "Distancia"),
+                ("altura", "Altura"),
                 ("tiempo", "Tiempo")
             ]
             variables = [
                 ("velocidad", "Velocidad"),
-                ("distancia", "Distancia"),
+                ("altura", "Altura"),
                 ("tiempo", "Tiempo")
             ]
-        elif movimiento == "LANZAMIENTO VERTICAL":
+
+        else:  # LANZAMIENTO VERTICAL
             objetivos = [
                 ("velocidad_final", "Velocidad Final"),
                 ("altura", "Altura"),
@@ -222,60 +229,61 @@ class CalculadoraFisica:
         self.objetivos_map = {texto: clave for clave, texto in objetivos}
 
         nombres_objetivos = [texto for _, texto in objetivos]
-        self.combo_objetivo["values"] = nombres_objetivos
         self.objetivo_var.set(nombres_objetivos[0])
+        self.combo_objetivo.configure(values=nombres_objetivos)
 
-        tk.Label(
-            self.marco_campos,
+        ctk.CTkLabel(
+            self.datos_frame,
+            text="Datos conocidos y unidades",
+            font=("Comfortaa", 18, "bold")
+        ).grid(row=0, column=0, columnspan=3, sticky="w", padx=18, pady=(18, 12))
+
+        ctk.CTkLabel(
+            self.datos_frame,
             text="Magnitud",
-            font=("Comfortaa", 11, "bold"),
-            bg="white"
-        ).grid(row=0, column=0, padx=10, pady=8, sticky="w")
+            font=("Comfortaa", 12, "bold")
+        ).grid(row=1, column=0, padx=18, pady=8, sticky="w")
 
-        tk.Label(
-            self.marco_campos,
+        ctk.CTkLabel(
+            self.datos_frame,
             text="Valor",
-            font=("Comfortaa", 11, "bold"),
-            bg="white"
-        ).grid(row=0, column=1, padx=10, pady=8, sticky="w")
+            font=("Comfortaa", 12, "bold")
+        ).grid(row=1, column=1, padx=18, pady=8, sticky="w")
 
-        tk.Label(
-            self.marco_campos,
+        ctk.CTkLabel(
+            self.datos_frame,
             text="Unidad",
-            font=("Comfortaa", 11, "bold"),
-            bg="white"
-        ).grid(row=0, column=2, padx=10, pady=8, sticky="w")
+            font=("Comfortaa", 12, "bold")
+        ).grid(row=1, column=2, padx=18, pady=8, sticky="w")
 
-        for i, (clave, texto) in enumerate(variables, start=1):
-            label = tk.Label(
-                self.marco_campos,
+        for i, (clave, texto) in enumerate(variables, start=2):
+            label = ctk.CTkLabel(
+                self.datos_frame,
                 text=f"{texto}:",
-                font=("Comfortaa", 11),
-                bg="white"
+                font=("Comfortaa", 12)
             )
-            label.grid(row=i, column=0, padx=12, pady=10, sticky="w")
+            label.grid(row=i, column=0, padx=18, pady=10, sticky="w")
 
-            entry = tk.Entry(
-                self.marco_campos,
-                width=20,
-                font=("Comfortaa", 11),
-                relief="solid",
-                bd=1
+            entry = ctk.CTkEntry(
+                self.datos_frame,
+                font=("Comfortaa", 12),
+                placeholder_text="Ingrese valor"
             )
-            entry.grid(row=i, column=1, padx=12, pady=10, sticky="w")
+            entry.grid(row=i, column=1, padx=18, pady=10, sticky="ew")
 
-            combo_unidad = ttk.Combobox(
-                self.marco_campos,
+            combo_unidad = ctk.CTkOptionMenu(
+                self.datos_frame,
                 values=self.obtener_unidades_por_variable(clave),
-                state="readonly",
-                width=12
+                font=("Comfortaa", 12),
+                dropdown_font=("Comfortaa", 12)
             )
-            combo_unidad.grid(row=i, column=2, padx=12, pady=10, sticky="w")
+            combo_unidad.grid(row=i, column=2, padx=18, pady=10, sticky="ew")
             combo_unidad.set(self.obtener_unidades_por_variable(clave)[0])
 
             self.entries[clave] = entry
             self.unit_boxes[clave] = combo_unidad
 
+        self.datos_frame.grid_columnconfigure(1, weight=1)
         self.actualizar_estado_entradas()
 
     def definir_campos_requeridos(self, movimiento, objetivo):
@@ -285,30 +293,32 @@ class CalculadoraFisica:
                 "velocidad": ["distancia", "tiempo"],
                 "tiempo": ["distancia", "velocidad"]
             }
+
         elif movimiento == "MRUV":
             requeridos = {
                 "velocidad_final": ["velocidad_inicial", "aceleracion", "tiempo"],
                 "distancia": ["velocidad_inicial", "aceleracion", "tiempo"],
                 "aceleracion": ["velocidad_inicial", "velocidad_final", "tiempo"]
             }
+
         elif movimiento == "CAÍDA LIBRE":
             requeridos = {
                 "velocidad": ["tiempo"],
-                "distancia": ["tiempo"],
-                "tiempo": ["distancia"]
+                "altura": ["tiempo"],
+                "tiempo": ["altura"]
             }
-        elif movimiento == "LANZAMIENTO VERTICAL":
+
+        else:  # LANZAMIENTO VERTICAL
             requeridos = {
                 "velocidad_final": ["velocidad_inicial", "tiempo"],
                 "altura": ["velocidad_inicial", "tiempo"],
                 "tiempo": ["velocidad_inicial", "velocidad_final"]
             }
-            
+
         return requeridos[objetivo]
 
     def actualizar_estado_entradas(self):
         objetivo_amigable = self.objetivo_var.get()
-
         if objetivo_amigable not in self.objetivos_map:
             return
 
@@ -318,19 +328,19 @@ class CalculadoraFisica:
 
         for clave, entry in self.entries.items():
             if clave == objetivo:
-                entry.config(state="disabled")
-                entry.delete(0, tk.END)
-                self.unit_boxes[clave].config(state="readonly")
+                entry.configure(state="disabled")
+                entry.delete(0, "end")
+                self.unit_boxes[clave].configure(state="normal")
             elif clave in self.campos_requeridos:
-                entry.config(state="normal")
-                self.unit_boxes[clave].config(state="readonly")
+                entry.configure(state="normal")
+                self.unit_boxes[clave].configure(state="normal")
             else:
-                entry.config(state="disabled")
-                entry.delete(0, tk.END)
-                self.unit_boxes[clave].config(state="disabled")
+                entry.configure(state="disabled")
+                entry.delete(0, "end")
+                self.unit_boxes[clave].configure(state="disabled")
 
     def convertir_a_base(self, clave, valor, unidad):
-        if clave in ["distancia"]:
+        if clave in ["distancia", "altura"]:
             if unidad == "m":
                 return valor
             elif unidad == "km":
@@ -352,17 +362,11 @@ class CalculadoraFisica:
 
         elif clave == "aceleracion":
             return valor
-        
-        elif clave in "altura":
-            if unidad == "m":
-                return valor
-            elif unidad == "km":
-                return valor / 1000
 
         return valor
 
     def convertir_desde_base(self, clave, valor, unidad):
-        if clave == "distancia":
+        if clave in ["distancia", "altura"]:
             if unidad == "m":
                 return valor
             elif unidad == "km":
@@ -384,18 +388,11 @@ class CalculadoraFisica:
 
         elif clave == "aceleracion":
             return valor
-        
-        elif clave == "altura":
-            if unidad == "m":
-                return valor
-            elif unidad == "km":
-                return valor / 1000
 
         return valor
 
     def obtener_datos(self):
         datos = {}
-
         for clave in self.campos_requeridos:
             valor_texto = self.entries[clave].get().strip()
 
@@ -421,10 +418,10 @@ class CalculadoraFisica:
         return "\n".join(lineas)
 
     def mostrar_resultado(self, texto):
-        self.resultado_text.config(state="normal")
-        self.resultado_text.delete("1.0", tk.END)
+        self.resultado_text.configure(state="normal")
+        self.resultado_text.delete("1.0", "end")
         self.resultado_text.insert("1.0", texto)
-        self.resultado_text.config(state="disabled")
+        self.resultado_text.configure(state="disabled")
 
     def calcular_resultado(self):
         try:
@@ -443,13 +440,20 @@ class CalculadoraFisica:
                 resultado_base, _ = calcular_mruv(objetivo, datos)
             elif movimiento == "CAÍDA LIBRE":
                 resultado_base, _ = calcular_caida_libre(objetivo, datos)
-            elif movimiento == "LANZAMIENTO VERTICAL":
+            else:
                 resultado_base, _ = calcular_lanzamiento_vertical(objetivo, datos)
 
             unidad_salida = self.unit_boxes[objetivo].get()
             resultado_convertido = self.convertir_desde_base(objetivo, resultado_base, unidad_salida)
 
-            texto_resultado = (f"Movimiento seleccionado: {movimiento}\nResultado final: {resultado_convertido:.2f} {unidad_salida}"
+            texto_resultado = (
+                "Cálculo realizado correctamente\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"Movimiento seleccionado: {movimiento}\n"
+                f"Dato calculado: {objetivo_amigable}\n\n"
+                "Datos ingresados:\n"
+                f"{self.formatear_datos_ingresados()}\n\n"
+                f"Resultado final: {resultado_convertido:.2f} {unidad_salida}"
             )
 
             self.mostrar_resultado(texto_resultado)
@@ -461,11 +465,11 @@ class CalculadoraFisica:
 
     def limpiar_todo(self):
         for clave, entry in self.entries.items():
-            entry.config(state="normal")
-            entry.delete(0, tk.END)
+            entry.configure(state="normal")
+            entry.delete(0, "end")
 
         for clave, combo in self.unit_boxes.items():
-            combo.config(state="readonly")
+            combo.configure(state="normal")
             combo.set(self.obtener_unidades_por_variable(clave)[0])
 
         self.actualizar_estado_entradas()
@@ -473,6 +477,6 @@ class CalculadoraFisica:
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = CalculadoraFisica(root)
+    root = ctk.CTk()
+    app = CalculadoraFisicaApp(root)
     root.mainloop()

@@ -41,26 +41,32 @@ def calcular_caida_libre(objetivo, datos):
     if objetivo == "velocidad":
         return (g * datos["tiempo"], "m/s")
     
-    elif objetivo == "distancia":
+    elif objetivo == "altura":
         return (0.5 * g * (datos["tiempo"] ** 2), "m")
     
     elif objetivo == "tiempo":
-        if datos["distancia"] < 0:
-            raise ValueError("La distancia no puede ser negativa para calcular el tiempo de caída libre.")
-        return (((2 * datos["distancia"])/g)**0.5, "s")
+        if datos["altura"] < 0:
+            raise ValueError("La altura no puede ser negativa para calcular el tiempo de caída libre.")
+        return (((2 * datos["altura"])/g)**0.5, "s")
     
-    raise ValueError("Variable objetivo no válida. Debe ser 'velocidad', 'distancia' o 'tiempo'.")
+    raise ValueError("Variable objetivo no válida para caída libre.")
 
 def calcular_lanzamiento_vertical(objetivo, datos):
     g = 9.8 #es el valor de la gravedad
-    
+
     if objetivo == "velocidad_final":
         return datos["velocidad_inicial"] - (g * datos["tiempo"]), "m/s"
+
     elif objetivo == "altura":
-        return ((datos["velocidad_inicial"] * datos["tiempo"]) - (0.5 * g * (datos["tiempo"] ** 2)), "m")
+        return (
+            (datos["velocidad_inicial"] * datos["tiempo"]) -
+            (0.5 * g * (datos["tiempo"] ** 2)),
+            "m"
+        )
+
     elif objetivo == "tiempo":
         if datos["velocidad_inicial"] < 0:
-            raise ValueError("La velocidad inicial no puede ser negativa para calcular el tiempo de lanzamiento vertical.")
+            raise ValueError("La velocidad inicial no puede ser negativa para calcular el tiempo.")
         return ((datos["velocidad_inicial"] - datos["velocidad_final"]) / g, "s")
-    
+
     raise ValueError("Variable objetivo no válida. Debe ser 'velocidad_final', 'altura' o 'tiempo'.")
