@@ -10,8 +10,8 @@ class CalculadoraFisicaApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Física - Cinemática")
-        self.root.geometry("1180x760")
-        self.root.minsize(1080, 700)
+        self.root.geometry("1000x700")
+        self.root.minsize(900, 620)
 
         self.movimiento_var = ctk.StringVar(value="MRU")
         self.objetivo_var = ctk.StringVar(value="")
@@ -29,7 +29,8 @@ class CalculadoraFisicaApp:
 
     def configurar_grid(self):
         self.root.grid_columnconfigure(0, weight=1)
-        self.root.grid_columnconfigure(1, weight=1)
+        self.root.grid_columnconfigure(1, weight=2)
+        self.root.grid_rowconfigure(0, weight=0)
         self.root.grid_rowconfigure(1, weight=1)
 
     def crear_layout(self):
@@ -444,9 +445,10 @@ class CalculadoraFisicaApp:
 
             objetivo = self.objetivos_map[objetivo_amigable]
             datos = self.obtener_datos()
+            procedimiento = ""
 
             if movimiento == "MRU":
-                resultado_base, _ = calcular_mru(objetivo, datos)
+                resultado_base, _, procedimiento = calcular_mru(objetivo, datos)
             elif movimiento == "MRUV":
                 resultado_base, _ = calcular_mruv(objetivo, datos)
             elif movimiento == "CAÍDA LIBRE":
@@ -462,6 +464,7 @@ class CalculadoraFisicaApp:
                 f"Dato calculado: {objetivo_amigable}\n\n"
                 "Datos ingresados:\n"
                 f"{self.formatear_datos_ingresados()}\n\n"
+                f"{procedimiento}\n\n"
                 f"Resultado final: {resultado_convertido:.2f} {unidad_salida}"
             )
 

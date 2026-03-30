@@ -2,17 +2,23 @@
 
 def calcular_mru(objetivo, datos):
     if objetivo == "distancia":
-        return datos["velocidad"] * datos["tiempo"], "m"
+        resultado = datos["velocidad"] * datos["tiempo"]
+        procedimiento = (f"Ecuación aplicada: d = v * t\nd = ({datos["velocidad"]:.2f} m/s) * ({datos["tiempo"]:.2f} s)\nd = {resultado:.2f} m")
+        return resultado, "m", procedimiento
 
     elif objetivo == "velocidad":
         if datos["tiempo"] == 0:
             raise ValueError("El tiempo no puede ser 0.")
-        return datos["distancia"] / datos["tiempo"], "m/s"
+        resultado = datos["distancia"] / datos["tiempo"]
+        procedimiento = (f"Ecuación aplicada: v = d / t\nv = ({datos["distancia"]:.2f} m) / ({datos["tiempo"]:.2f} s)\nv = {resultado:.2f} m/s")
+        return resultado, "m/s", procedimiento
 
     elif objetivo == "tiempo":
         if datos["velocidad"] == 0:
             raise ValueError("La velocidad no puede ser cero para calcular el tiempo.")
-        return datos["distancia"] / datos["velocidad"], "s"
+        resultado = datos["distancia"] / datos["velocidad"]
+        procedimiento = (f"Ecuación aplicada: t = d / v\nt = ({datos["distancia"]:.2f} m) / ({datos["velocidad"]:.2f} m/s)\nt = {resultado:.2f} s")
+        return resultado, "s", procedimiento
 
     raise ValueError("Variable objetivo no válida. Debe ser 'distancia', 'velocidad' o 'tiempo'.")
 
