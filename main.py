@@ -21,6 +21,7 @@ class CalculadoraFisicaApp:
         self.labels_amigables = {}
         self.campos_requeridos = []
         self.objetivos_map = {}
+        self.historial = []
 
         self.configurar_grid()
         self.crear_layout()
@@ -35,6 +36,7 @@ class CalculadoraFisicaApp:
         self.header = ctk.CTkFrame(self.root, corner_radius=18, fg_color="#d9e9f7")
         self.header.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=20, pady=(20, 10))
 
+        #CREAMOS EL TITULO
         self.title_label = ctk.CTkLabel(
             self.header,
             text="Calculadora de Física - Cinemática",
@@ -43,6 +45,7 @@ class CalculadoraFisicaApp:
         )
         self.title_label.pack(pady=(18, 6))
 
+        #CREAMOS EL SUBTITULO
         self.subtitle_label = ctk.CTkLabel(
             self.header,
             text="Seleccione el tipo de movimiento, el dato a calcular, ingrese valores y elija las unidades.",
@@ -51,17 +54,25 @@ class CalculadoraFisicaApp:
         )
         self.subtitle_label.pack(pady=(0, 18))
 
+        #CREAMOS EL PANEL IZQUIERDO
         self.panel_izquierdo = ctk.CTkFrame(self.root, corner_radius=18)
         self.panel_izquierdo.grid(row=1, column=0, sticky="nsew", padx=(20, 10), pady=(0, 20))
         self.panel_izquierdo.grid_columnconfigure(0, weight=1)
 
+        #CREAMOS EL PANEL DERECHO
         self.panel_derecho = ctk.CTkFrame(self.root, corner_radius=18)
         self.panel_derecho.grid(row=1, column=1, sticky="nsew", padx=(10, 20), pady=(0, 20))
         self.panel_derecho.grid_rowconfigure(1, weight=1)
         self.panel_derecho.grid_columnconfigure(0, weight=1)
+        
+        #CREAMOS EL PANEL DEL HISTORIAL
+        self.panel_historial = ctk.CTkFrame(self.root, corner_radius=18)
+        self.panel_historial.grid(row = 2, column = 0, columnspan = 2, sticky = "nsew", padx = 20, pady = (0, 20))
+        self.panel_historial.grid_columnconfigure(0, weight = 1)
 
         self.crear_panel_configuracion()
         self.crear_panel_resultado()
+        self.crear_panel_historial()
 
     def crear_panel_configuracion(self):
         self.config_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius=14)
@@ -447,8 +458,6 @@ class CalculadoraFisicaApp:
             resultado_convertido = self.convertir_desde_base(objetivo, resultado_base, unidad_salida)
 
             texto_resultado = (
-                "Cálculo realizado correctamente\n"
-                "━━━━━━━━━━━━━━━━━━━━━━\n"
                 f"Movimiento seleccionado: {movimiento}\n"
                 f"Dato calculado: {objetivo_amigable}\n\n"
                 "Datos ingresados:\n"
@@ -457,6 +466,7 @@ class CalculadoraFisicaApp:
             )
 
             self.mostrar_resultado(texto_resultado)
+            self.agregar_al_historial(texto_resultado)
 
         except ValueError as e:
             messagebox.showerror("Error de entrada", str(e))
@@ -474,6 +484,30 @@ class CalculadoraFisicaApp:
 
         self.actualizar_estado_entradas()
         self.mostrar_resultado("Aquí aparecerá el resultado del cálculo.")
+        
+    def crear_panel_historial(self):
+        self.historial_label = ctk.CTkLabel(self.panel_historial, text="Historial de cálculos", font=("Comfortaa", 18, "bold"))
+        self.historial_label.pack(anchor = "w", padx = 20, pady = (15, 10))
+        self.historial_text = ctk.CTkTextbox(self.panel_historial, font = ("Comfortaa", 12), height = 150)
+        
+        self.historial_text.pack(fill = "both", expand = True, padx = 20, pady = (0, 15))
+        self.historial_text.configure(state = "disabled")
+        
+        self.boton_limpiar_historial = ctk.CTkButton(self.panel_historial, text = "Limpiar historial", command = self.limpiar_historial, font = ("Comfortaa", 12, "bold"), fg_color = "#c0392b", hover_color = "#a93226")
+        self.boton_limpiar_historial.pack(padx = 20, pady = (0, 15))
+        
+    def agregar_al_historial(self, texto):
+        self.historial.append(texto)
+        self.historial_text.configure(state = "normal")
+        self.historial_text.insert("end", texto + "\n\n")
+        self.historial_text.configure(state = "disabled")
+        self.historial_text.see("end")
+        
+    def limpiar_historial(self):
+        self.historial.clear()
+        self.historial_text.configure(state = "normal")
+        self.historial_text.delete("1.0", "end")
+        self.historial_text.configure(state = "disabled")
 
 
 if __name__ == "__main__":
