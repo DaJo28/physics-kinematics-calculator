@@ -25,19 +25,21 @@ def calcular_mru(objetivo, datos):
 
 def calcular_mruv(objetivo, datos):
     if objetivo == "velocidad_final":
-        return datos["velocidad_inicial"] + (datos["aceleracion"] * datos["tiempo"]), "m/s"
+        resultado =  datos["velocidad_inicial"] + (datos["aceleracion"] * datos["tiempo"])
+        procedimiento = (f"Ecuación aplicada: v_f = v_i + a * t\nv_f = ({datos["velocidad_inicial"]:.2f} m/s) + ({datos["aceleracion"]:.2f} m/s²) * ({datos["tiempo"]:.2f} s)\nv_f = {resultado:.2f} m/s")
+        return resultado, "m/s", procedimiento
 
     elif objetivo == "distancia":
-        return (
-            (datos["velocidad_inicial"] * datos["tiempo"]) +
-            (0.5 * datos["aceleracion"] * (datos["tiempo"] ** 2)),
-            "m"
-        )
+        resultado = (datos["velocidad_inicial"] * datos["tiempo"]) + (0.5 * datos["aceleracion"] * (datos["tiempo"] ** 2))
+        procedimiento = (f"Ecuación aplicada: d = v_i * t + 0.5 * a * t²\nd = ({datos["velocidad_inicial"]:.2f} m/s) * ({datos["tiempo"]:.2f} s) + 0.5 * ({datos["aceleracion"]:.2f} m/s²) * ({datos["tiempo"]:.2f} s)²\nd = {resultado:.2f} m")
+        return resultado, "m", procedimiento
 
     elif objetivo == "aceleracion":
         if datos["tiempo"] == 0:
             raise ValueError("El tiempo no puede ser cero para calcular la aceleración.")
-        return (datos["velocidad_final"] - datos["velocidad_inicial"]) / datos["tiempo"], "m/s²"
+        resultado = (datos["velocidad_final"] - datos["velocidad_inicial"]) / datos["tiempo"]
+        procedimiento = (f"Ecuación aplicada: a = (v_f - v_i) / t\na = ({datos["velocidad_final"]:.2f} m/s - {datos["velocidad_inicial"]:.2f} m/s) / ({datos["tiempo"]:.2f} s)\na = {resultado:.2f} m/s²")
+        return resultado, "m/s²", procedimiento
 
     raise ValueError("Variable objetivo no válida. Debe ser 'velocidad_final', 'distancia' o 'aceleracion'.")
 

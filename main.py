@@ -10,7 +10,7 @@ class CalculadoraFisicaApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Física - Cinemática")
-        self.root.geometry("1000x700")
+        self.root.geometry("1000x650")
         self.root.minsize(900, 620)
 
         self.movimiento_var = ctk.StringVar(value="MRU")
@@ -76,75 +76,79 @@ class CalculadoraFisicaApp:
         self.crear_panel_historial()
 
     def crear_panel_configuracion(self):
+        self.panel_izquierdo.grid_rowconfigure(0, weight=0)
+        self.panel_izquierdo.grid_rowconfigure(1, weight=1)
+        self.panel_izquierdo.grid_rowconfigure(2, weight=0)
+        self.panel_izquierdo.grid_columnconfigure(0, weight=1)
+        
         self.config_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius=14)
-        self.config_frame.pack(fill="x", padx=18, pady=(18, 10))
-
+        self.config_frame.grid(row=0, column=0, sticky="ew", padx=18, pady=(18, 10))
+        
+        ctk.CTkLabel(self.config_frame, text = "Configuración del cálculo", font = ("Comfortaa", 18, "bold")).grid(row = 0, column = 0, columnspan = 2, sticky = "w", padx = 18, pady = (18, 16))
+        
         ctk.CTkLabel(
             self.config_frame,
-            text="Configuración del problema",
-            font=("Comfortaa", 18, "bold")
-        ).grid(row=0, column=0, columnspan=2, sticky="w", padx=18, pady=(18, 16))
-
-        ctk.CTkLabel(
-            self.config_frame,
-            text="Tipo de movimiento",
-            font=("Comfortaa", 13, "bold")
-        ).grid(row=1, column=0, sticky="w", padx=18, pady=8)
-
+            text = "Tipo de movimiento:",
+            font = ("Comfortaa", 12, "bold")
+        ).grid(row = 1, column = 0, sticky = "w", padx = 18, pady = 8)
+        
         self.combo_movimiento = ctk.CTkOptionMenu(
             self.config_frame,
-            variable=self.movimiento_var,
-            values=["MRU", "MRUV", "CAÍDA LIBRE", "LANZAMIENTO VERTICAL"],
-            command=lambda _: self.actualizar_campos(),
-            font=("Comfortaa", 12),
-            dropdown_font=("Comfortaa", 12)
+            variable = self.movimiento_var,
+            values = ["MRU", "MRUV", "CAÍDA LIBRE", "LANZAMIENTO VERTICAL"],
+            command = lambda _: self.actualizar_campos(),
+            font = ("Comfortaa", 12),
+            dropdown_font = ("Comfortaa", 12)
         )
-        self.combo_movimiento.grid(row=1, column=1, sticky="ew", padx=18, pady=8)
-
+        self.combo_movimiento.grid(row = 1, column = 1, sticky = "ew", padx = 18, pady = 8)
+        
         ctk.CTkLabel(
             self.config_frame,
-            text="Dato a calcular",
-            font=("Comfortaa", 13, "bold")
-        ).grid(row=2, column=0, sticky="w", padx=18, pady=(8, 18))
-
+            text = "Dato a calcular:",
+            font = ("Comfortaa", 13, "bold")
+        ).grid(row = 2, column = 0, sticky = "w", padx = 18, pady = (8, 18))
+        
         self.combo_objetivo = ctk.CTkOptionMenu(
             self.config_frame,
-            variable=self.objetivo_var,
-            values=[""],
-            command=lambda _: self.actualizar_estado_entradas(),
-            font=("Comfortaa", 12),
-            dropdown_font=("Comfortaa", 12)
+            variable = self.objetivo_var,
+            values = [""],
+            command = lambda _: self.actualizar_estado_entradas(),
+            font = ("Comfortaa", 12),
+            dropdown_font = ("Comfortaa", 12)
         )
-        self.combo_objetivo.grid(row=2, column=1, sticky="ew", padx=18, pady=(8, 18))
-
-        self.config_frame.grid_columnconfigure(1, weight=1)
-
-        self.datos_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius=14)
-        self.datos_frame.pack(fill="both", expand=True, padx=18, pady=10)
-        self.datos_frame.grid_columnconfigure(1, weight=1)
-
-        self.botones_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius=14)
-        self.botones_frame.pack(fill="x", padx=18, pady=(10, 18))
-
+        self.combo_objetivo.grid(row = 2, column = 1, sticky = "ew", padx = 18, pady = (8, 18))
+        
+        self.config_frame.grid_columnconfigure(1, weight = 1)
+        
+        self.datos_frame = ctk.CTkScrollableFrame(self.panel_izquierdo, corner_radius = 14)
+        self.datos_frame.grid(row = 1, column = 0, sticky = "nsew", padx = 18, pady = 10)
+        self.datos_frame.grid_columnconfigure(1, weight = 1)
+        
+        self.botones_frame = ctk.CTkFrame(self.panel_izquierdo, corner_radius = 14)
+        self.botones_frame.grid(row = 2, column = 0, sticky = "ew", padx = 18, pady = (10, 18))
+        
         self.boton_calcular = ctk.CTkButton(
             self.botones_frame,
-            text="Calcular",
-            command=self.calcular_resultado,
-            font=("Comfortaa", 13, "bold"),
-            height=42
+            text = "Calcular",
+            command = self.calcular_resultado,
+            font = ("Comfortaa", 13, "bold"),
+            height = 42
         )
-        self.boton_calcular.pack(side="left", expand=True, fill="x", padx=(16, 8), pady=16)
-
+        self.boton_calcular.grid(row = 0, column = 0, sticky = "ew", padx = (16, 8), pady = 16)
+        
         self.boton_limpiar = ctk.CTkButton(
             self.botones_frame,
-            text="Limpiar",
-            command=self.limpiar_todo,
-            font=("Comfortaa", 13, "bold"),
-            height=42,
-            fg_color="#7c8a99",
-            hover_color="#6d7985"
+            text = "Limpiar",
+            command = self.limpiar_todo,
+            font = ("Comfortaa", 13, "bold"),
+            height = 42,
+            fg_color = "#7c8a99",
+            hover_color = "#6d7985"
         )
-        self.boton_limpiar.pack(side="left", expand=True, fill="x", padx=(8, 16), pady=16)
+        self.boton_limpiar.grid(row = 0, column = 1, sticky = "ew", padx = (8, 16), pady = 16)
+        
+        self.botones_frame.grid_columnconfigure(0, weight = 1)
+        self.botones_frame.grid_columnconfigure(1, weight = 1)
 
     def crear_panel_resultado(self):
         self.resultado_header = ctk.CTkLabel(
@@ -247,8 +251,8 @@ class CalculadoraFisicaApp:
         ctk.CTkLabel(
             self.datos_frame,
             text="Datos conocidos y unidades",
-            font=("Comfortaa", 18, "bold")
-        ).grid(row=0, column=0, columnspan=3, sticky="w", padx=18, pady=(18, 12))
+            font=("Comfortaa", 16, "bold")
+        ).grid(row=0, column=0, columnspan=3, sticky="w", padx=18, pady=(10, 8))
 
         ctk.CTkLabel(
             self.datos_frame,
@@ -274,14 +278,14 @@ class CalculadoraFisicaApp:
                 text=f"{texto}:",
                 font=("Comfortaa", 12)
             )
-            label.grid(row=i, column=0, padx=18, pady=10, sticky="w")
+            label.grid(row=i, column=0, padx=18, pady=6, sticky="w")
 
             entry = ctk.CTkEntry(
                 self.datos_frame,
                 font=("Comfortaa", 12),
                 placeholder_text="Ingrese valor"
             )
-            entry.grid(row=i, column=1, padx=18, pady=10, sticky="ew")
+            entry.grid(row=i, column=1, padx=18, pady=6, sticky="ew")
 
             combo_unidad = ctk.CTkOptionMenu(
                 self.datos_frame,
@@ -289,7 +293,7 @@ class CalculadoraFisicaApp:
                 font=("Comfortaa", 12),
                 dropdown_font=("Comfortaa", 12)
             )
-            combo_unidad.grid(row=i, column=2, padx=18, pady=10, sticky="ew")
+            combo_unidad.grid(row=i, column=2, padx=18, pady=6, sticky="ew")
             combo_unidad.set(self.obtener_unidades_por_variable(clave)[0])
 
             self.entries[clave] = entry
@@ -450,7 +454,7 @@ class CalculadoraFisicaApp:
             if movimiento == "MRU":
                 resultado_base, _, procedimiento = calcular_mru(objetivo, datos)
             elif movimiento == "MRUV":
-                resultado_base, _ = calcular_mruv(objetivo, datos)
+                resultado_base, _, procedimiento = calcular_mruv(objetivo, datos)
             elif movimiento == "CAÍDA LIBRE":
                 resultado_base, _ = calcular_caida_libre(objetivo, datos)
             else:
@@ -491,9 +495,9 @@ class CalculadoraFisicaApp:
     def crear_panel_historial(self):
         self.historial_label = ctk.CTkLabel(self.panel_historial, text="Historial de cálculos", font=("Comfortaa", 18, "bold"))
         self.historial_label.pack(anchor = "w", padx = 20, pady = (15, 10))
-        self.historial_text = ctk.CTkTextbox(self.panel_historial, font = ("Comfortaa", 12), height = 150)
+        self.historial_text = ctk.CTkTextbox(self.panel_historial, font = ("Comfortaa", 12), height = 120)
         
-        self.historial_text.pack(fill = "both", expand = True, padx = 20, pady = (0, 15))
+        self.historial_text.pack(fill = "both", expand = False, padx = 20, pady = (0, 15))
         self.historial_text.configure(state = "disabled")
         
         self.boton_limpiar_historial = ctk.CTkButton(self.panel_historial, text = "Limpiar historial", command = self.limpiar_historial, font = ("Comfortaa", 12, "bold"), fg_color = "#c0392b", hover_color = "#a93226")
