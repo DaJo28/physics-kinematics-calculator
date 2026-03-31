@@ -47,16 +47,22 @@ def calcular_caida_libre(objetivo, datos):
     g = 9.8 #es el valor de la gravedad
     
     if objetivo == "velocidad":
-        return (g * datos["tiempo"], "m/s")
+        resultado = (g * datos["tiempo"])
+        procedimiento = (f"Ecuación aplicada: v = g * t\nv = ({g:.2f} m/s²) * ({datos["tiempo"]:.2f} s)\nv = {resultado:.2f} m/s")
+        return resultado, "m/s", procedimiento
     
     elif objetivo == "altura":
-        return (0.5 * g * (datos["tiempo"] ** 2), "m")
-    
+        resultado = (0.5 * g * (datos["tiempo"] ** 2))
+        procedimiento = (f"Ecuación aplicada: d = 0.5 * g * t²\nd = 0.5 * ({g:.2f} m/s²) * ({datos["tiempo"]:.2f} s)²\nd = {resultado:.2f} m")
+        return resultado, "m", procedimiento
+
     elif objetivo == "tiempo":
         if datos["altura"] < 0:
             raise ValueError("La altura no puede ser negativa para calcular el tiempo de caída libre.")
-        return (((2 * datos["altura"])/g)**0.5, "s")
-    
+        resultado = (((2 * datos["altura"])/g)**0.5)
+        procedimiento = (f"Ecuación aplicada: t = √(2 * d / g)\nt = √(2 * ({datos["altura"]:.2f} m) / ({g:.2f} m/s²))\nt = {resultado:.2f} s")
+        return resultado, "s", procedimiento
+
     raise ValueError("Variable objetivo no válida para caída libre.")
 
 def calcular_lanzamiento_vertical(objetivo, datos):

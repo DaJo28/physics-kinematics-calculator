@@ -456,7 +456,7 @@ class CalculadoraFisicaApp:
             elif movimiento == "MRUV":
                 resultado_base, _, procedimiento = calcular_mruv(objetivo, datos)
             elif movimiento == "CAÍDA LIBRE":
-                resultado_base, _ = calcular_caida_libre(objetivo, datos)
+                resultado_base, _, procedimiento = calcular_caida_libre(objetivo, datos)
             else:
                 resultado_base, _ = calcular_lanzamiento_vertical(objetivo, datos)
 
