@@ -521,3 +521,5 @@ if __name__ == "__main__":
     root = ctk.CTk()
     app = CalculadoraFisicaApp(root)
     root.mainloop()
+    
+#K247

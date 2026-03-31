@@ -84,3 +84,5 @@ def calcular_lanzamiento_vertical(objetivo, datos):
         return ((datos["velocidad_inicial"] - datos["velocidad_final"]) / g, "s")
 
     raise ValueError("Variable objetivo no válida. Debe ser 'velocidad_final', 'altura' o 'tiempo'.")
+
+#K247
