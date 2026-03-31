@@ -457,8 +457,8 @@ class CalculadoraFisicaApp:
                 resultado_base, _, procedimiento = calcular_mruv(objetivo, datos)
             elif movimiento == "CAÍDA LIBRE":
                 resultado_base, _, procedimiento = calcular_caida_libre(objetivo, datos)
-            else:
-                resultado_base, _ = calcular_lanzamiento_vertical(objetivo, datos)
+            elif movimiento == "LANZAMIENTO VERTICAL":
+                resultado_base, _, procedimiento = calcular_lanzamiento_vertical(objetivo, datos)
 
             unidad_salida = self.unit_boxes[objetivo].get()
             resultado_convertido = self.convertir_desde_base(objetivo, resultado_base, unidad_salida)

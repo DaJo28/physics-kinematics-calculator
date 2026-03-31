@@ -69,19 +69,21 @@ def calcular_lanzamiento_vertical(objetivo, datos):
     g = 9.8 #es el valor de la gravedad
 
     if objetivo == "velocidad_final":
-        return datos["velocidad_inicial"] - (g * datos["tiempo"]), "m/s"
+        resultado = datos["velocidad_inicial"] - (g * datos["tiempo"])
+        procedimiento = (f"Ecuación aplicada: v_f = v_i - g * t\nv_f = ({datos["velocidad_inicial"]:.2f} m/s) - ({g:.2f} m/s²) * ({datos["tiempo"]:.2f} s)\nv_f = {resultado:.2f} m/s")
+        return resultado, "m/s", procedimiento
 
     elif objetivo == "altura":
-        return (
-            (datos["velocidad_inicial"] * datos["tiempo"]) -
-            (0.5 * g * (datos["tiempo"] ** 2)),
-            "m"
-        )
+        resultado = (datos["velocidad_inicial"] * datos["tiempo"]) - (0.5 * g * (datos["tiempo"] ** 2))
+        procedimiento = (f"Ecuación aplicada: d = v_i * t - 0.5 * g * t²\nd = ({datos["velocidad_inicial"]:.2f} m/s) * ({datos["tiempo"]:.2f} s) - 0.5 * ({g:.2f} m/s²) * ({datos["tiempo"]:.2f} s)²\nd = {resultado:.2f} m")
+        return resultado, "m", procedimiento
 
     elif objetivo == "tiempo":
         if datos["velocidad_inicial"] < 0:
             raise ValueError("La velocidad inicial no puede ser negativa para calcular el tiempo.")
-        return ((datos["velocidad_inicial"] - datos["velocidad_final"]) / g, "s")
+        resultado = ((datos["velocidad_inicial"] - datos["velocidad_final"]) / g)
+        procedimiento = (f"Ecuación aplicada: t = (v_i - v_f) / g\nt = ({datos["velocidad_inicial"]:.2f} m/s - {datos["velocidad_final"]:.2f} m/s) / ({g:.2f} m/s²)\nt = {resultado:.2f} s")
+        return resultado, "s", procedimiento
 
     raise ValueError("Variable objetivo no válida. Debe ser 'velocidad_final', 'altura' o 'tiempo'.")
 
