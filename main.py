@@ -10,8 +10,8 @@ class CalculadoraFisicaApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Física - Cinemática")
-        self.root.geometry("1000x650")
-        self.root.minsize(900, 620)
+        self.root.geometry("1000x850")
+        self.root.minsize(1000, 850)
 
         self.movimiento_var = ctk.StringVar(value="MRU")
         self.objetivo_var = ctk.StringVar(value="")
