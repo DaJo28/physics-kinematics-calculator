@@ -1,5 +1,6 @@
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
+from datetime import datetime
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -249,6 +250,11 @@ class CalculadoraFisicaApp:
         self.resultado_text.grid(row=1, column=0, sticky="nsew", padx=18, pady=(0, 18))
         self.resultado_text.insert("1.0", "Aquí aparecerá el resultado del cálculo.")
         self.resultado_text.configure(state="disabled")
+        
+        self.resultado_botones_frame = ctk.CTkFrame(self.panel_derecho, corner_radius = 14)
+        self.resultado_botones_frame.grid(row = 2, column = 0, sticky = "ew", padx = 18, pady = (0, 18))
+        self.boton_exportar_resultado = ctk.CTkButton(self.resultado_botones_frame, text = "Exportar resultado a TXT", command = self.exportar_resultado_txt, font = ("Comfortaa", 12, "bold"), height = 38, fg_color = "#229954", hover_color = "#1e8449")
+        self.boton_exportar_resultado.pack(fill = "x", padx = 12, pady = 12)
 
     def crear_tab_grafica(self):
         self.tab_grafica.grid_columnconfigure(0, weight=1)
@@ -291,15 +297,17 @@ class CalculadoraFisicaApp:
         self.historial_text.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 15))
         self.historial_text.configure(state="disabled")
 
-        self.boton_limpiar_historial = ctk.CTkButton(
-            self.tab_historial,
-            text="Limpiar historial",
-            command=self.limpiar_historial,
-            font=("Comfortaa", 12, "bold"),
-            fg_color="#c0392b",
-            hover_color="#a93226"
-        )
-        self.boton_limpiar_historial.grid(row=2, column=0, pady=(0, 20))
+        self.historial_botones_frame = ctk.CTkFrame(self.tab_historial, corner_radius = 14)
+        self.historial_botones_frame.grid(row = 2, column = 0, sticky = "ew", padx = 20, pady = (0, 20))
+        
+        self.boton_exportar_historial = ctk.CTkButton(self.historial_botones_frame, text = "Exportar historial a TXT", command = self.exportar_historial_txt, font = ("Comfortaa", 12, "bold"), fg_color = "#229954", hover_color = "#1e8449")
+        self.boton_exportar_historial.grid(row = 0, column = 0, sticky = "ew", padx = (12, 6), pady = 12)
+        
+        self.boton_limpiar_historial = ctk.CTkButton(self.historial_botones_frame, text = "Limpiar historial", command = self.limpiar_historial, font = ("Comfortaa", 12, "bold"), fg_color = "#c0392b", hover_color = "#a93226")
+        self.boton_limpiar_historial.grid(row = 0, column = 1, sticky = "ew", padx = (6, 12), pady = 12)
+        
+        self.historial_botones_frame.grid_columnconfigure(0, weight = 1)
+        self.historial_botones_frame.grid_columnconfigure(1, weight = 1)
 
     def limpiar_campos(self):
         for widget in self.datos_frame.winfo_children():
@@ -771,6 +779,97 @@ class CalculadoraFisicaApp:
                 for t in tiempos
             ]
             return tiempos, valores, "Lanzamiento Vertical: Altura vs Tiempo", "Altura (m)"
+    
+    def obtener_fecha_actual(self):
+        return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    
+    def exportar_resultado_txt(self):
+        contenido = self.resultado_text.get("1.0", "end").strip()
+    
+        if not contenido or contenido == "Aquí aparecerá el resultado del cálculo.":
+            messagebox.showwarning(
+                "Sin resultado",
+                "Primero debe realizar un cálculo antes de exportar el resultado."
+            )
+            return
+    
+        nombre_sugerido = f"resultado_calculo_{self.obtener_fecha_actual()}.txt"
+    
+        ruta_archivo = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            initialfile=nombre_sugerido,
+            filetypes=[
+                ("Archivo de texto", "*.txt"),
+                ("Todos los archivos", "*.*")
+            ]
+        )
+    
+        if not ruta_archivo:
+            return
+    
+        try:
+            with open(ruta_archivo, "w", encoding="utf-8") as archivo:
+                archivo.write("Calculadora de Física - Cinemática\n")
+                archivo.write("Resultado exportado\n")
+                archivo.write("====================================\n\n")
+                archivo.write(contenido)
+    
+            messagebox.showinfo(
+                "Exportación exitosa",
+                "El resultado fue exportado correctamente."
+            )
+    
+        except Exception as e:
+            messagebox.showerror(
+                "Error al exportar",
+                f"No se pudo exportar el resultado:\n{e}"
+            )
+    
+    
+    def exportar_historial_txt(self):
+        if not self.historial:
+            messagebox.showwarning(
+                "Historial vacío",
+                "No hay cálculos en el historial para exportar."
+            )
+            return
+    
+        nombre_sugerido = f"historial_calculos_{self.obtener_fecha_actual()}.txt"
+    
+        ruta_archivo = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            initialfile=nombre_sugerido,
+            filetypes=[
+                ("Archivo de texto", "*.txt"),
+                ("Todos los archivos", "*.*")
+            ]
+        )
+    
+        if not ruta_archivo:
+            return
+    
+        try:
+            with open(ruta_archivo, "w", encoding="utf-8") as archivo:
+                archivo.write("Calculadora de Física - Cinemática\n")
+                archivo.write("Historial de cálculos\n")
+                archivo.write("====================================\n\n")
+    
+                for index, calculo in enumerate(self.historial, start=1):
+                    archivo.write(f"Cálculo #{index}\n")
+                    archivo.write("------------------------------------\n")
+                    archivo.write(calculo)
+                    archivo.write("\n\n")
+    
+            messagebox.showinfo(
+                "Exportación exitosa",
+                "El historial fue exportado correctamente."
+            )
+    
+        except Exception as e:
+            messagebox.showerror(
+                "Error al exportar",
+                f"No se pudo exportar el historial:\n{e}"
+            )
 
 
 if __name__ == "__main__":
