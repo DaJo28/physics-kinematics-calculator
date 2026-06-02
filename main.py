@@ -18,13 +18,14 @@ ctk.set_default_color_theme("blue")
 class CalculadoraFisicaApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Calculadora de Física - Cinemática")
+        self.root.title("Kadimy's Calculator")
         self.root.geometry("1050x700")
         self.root.minsize(900, 620)
         self.root.resizable(True, True)
 
         self.movimiento_var = ctk.StringVar(value="MRU")
         self.objetivo_var = ctk.StringVar(value="")
+        self.tema_var = ctk.StringVar(value = "Claro")
 
         self.entries = {}
         self.unit_boxes = {}
@@ -50,7 +51,7 @@ class CalculadoraFisicaApp:
 
         self.title_label = ctk.CTkLabel(
             self.header,
-            text="Calculadora de Física - Cinemática",
+            text="Kadimy's Calculator",
             font=("Comfortaa", 24, "bold"),
             text_color="#16324f"
         )
@@ -63,6 +64,16 @@ class CalculadoraFisicaApp:
             text_color="#35516b"
         )
         self.subtitle_label.pack(pady=(0, 14))
+        
+        self.tema_frame = ctk.CTkFrame(self.header, fg_color = "transparent")
+        self.tema_frame.pack(pady = (0, 14))
+        
+        self.tema_label = ctk.CTkLabel(self.tema_frame, text = "Tema: ", font = ("Comfortaa", 12, "bold"), text_color = "#35516b")
+        self.tema_label.pack(side = "left", padx = (0, 10))
+        
+        self.tema_selector = ctk.CTkSegmentedButton(self.tema_frame, values = ["Claro", "Oscuro"], variable = self.tema_var, command = self.cambiar_tema, font = ("Comfortaa", 12))
+        self.tema_selector.pack(side = "left")
+        self.tema_selector.set("Claro")
 
         self.tabs = ctk.CTkTabview(self.root, corner_radius=18)
         self.tabs.grid(row=1, column=0, sticky="nsew", padx=16, pady=(0, 16))
@@ -870,6 +881,26 @@ class CalculadoraFisicaApp:
                 "Error al exportar",
                 f"No se pudo exportar el historial:\n{e}"
             )
+    
+    def cambiar_tema(self, tema):
+        if tema == "Claro":
+            ctk.set_appearance_mode("light")
+            self.aplicar_colores_tema_claro()
+        else:
+            ctk.set_appearance_mode("dark")
+            self.aplicar_colores_tema_oscuro()
+    
+    def aplicar_colores_tema_claro(self):
+        self.header.configure(fg_color = "#d9e9f7")
+        self.title_label.configure(text_color = "#16324f")
+        self.subtitle_label.configure(text_color = "#35516b")
+        self.tema_label.configure(text_color = "#35516b")
+    
+    def aplicar_colores_tema_oscuro(self):
+        self.header.configure(fg_color = "#1f2d3a")
+        self.title_label.configure(text_color = "#eaf2f8")
+        self.subtitle_label.configure(text_color = "#d6eaf8")
+        self.tema_label.configure(text_color = "#d6eaf8")
 
 
 if __name__ == "__main__":
